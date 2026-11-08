@@ -1,0 +1,2 @@
+# Render installs from the repo root; the real list lives next to the backend.
+-r backend/requirements.txt

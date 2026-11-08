@@ -1,0 +1,21 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# Local data: SQLite DB, narration audio, TTS cache, voice previews
+*.db
+*.db-journal
+backend/data/
+data/
+
+# Python / local junk
+.venv/
+__pycache__/
+*.pyc
+*.log
+*.tgz
+.DS_Store
