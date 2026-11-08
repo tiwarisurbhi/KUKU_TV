@@ -77,4 +77,146 @@ PROFILES = {
         "register": ("Everyday spoken Kannada as heard in Bengaluru today, Kannada script, with common English words mixed "
                      "in naturally. Avoid heavy Sanskritized words; dialogue uses spoken forms (ಹೋಗ್ತೀನಿ, ಹೇಳು, ಗೊತ್ತಿಲ್ಲ). "
                      "Sentences end with a full stop (.). ನೀನು/ನೀವು show the relationship."),
-        "loanwords": "ಪ್ಲಾನ್, ಡೀಲ್, ಸಾರಿ, ಪ್ಲೀಸ್, ಕ್ರೂ, ಕ್ಯಾಪ್ಟನ್, ಸಿಗ್ನಲ್, ಟೆನ್ಷನ್, ಪ್ರಪೋಸ್, ಮಿ�
+        "loanwords": "ಪ್ಲಾನ್, ಡೀಲ್, ಸಾರಿ, ಪ್ಲೀಸ್, ಕ್ರೂ, ಕ್ಯಾಪ್ಟನ್, ಸಿಗ್ನಲ್, ಟೆನ್ಷನ್, ಪ್ರಪೋಸ್, ಮಿಷನ್",
+        "swaps": {"ಕ್ರೋಧ": "ಸಿಟ್ಟು", "ವಿವಾಹ": "ಮದುವೆ", "ಅಶ್ರು": "ಕಣ್ಣೀರು", "ಅತ್ಯಂತ": "ತುಂಬಾ", "ಗೃಹ": "ಮನೆ",
+                  "ಸ್ವರ್ಣ": "ಚಿನ್ನ"},
+        "gender_rule": ("Third-person verbs agree with gender. Check the cast sheet before every verb: female {C1} → "
+                        "‘{C1} ಅತ್ತಳು’, ‘{C1} ಹೋದಳು’; male {C3} → ‘{C3} ಅತ್ತನು’, ‘{C3} ಹೋದನು’."),
+        "case_style": "attached", "case_example": "{C1}ಗೆ, {C1}ನ, {C1}ನ್ನ, {C1}ಜೊತೆ, {E2}ಅಲ್ಲಿ",
+        "samples": [
+            ("{C1} ಕುತ್ತಿಗೆಯಲ್ಲಿ ಒಂದು ವಿಚಿತ್ರ ಚಿನ್ನದ ನಾಣ್ಯ ನೇತಾಡುತ್ತಿತ್ತು, ಯಾರೂ ಅದನ್ನು ಗಮನಿಸಲಿಲ್ಲ.", "whisper"),
+            ("{C2} ದನಿ ತಣ್ಣಗಿತ್ತು, ‘ನಿನ್ನ ಪ್ಲಾನ್ ಇನ್ನು ಕೆಲಸ ಮಾಡಲ್ಲ.’", "pause"),
+            ("ಎಲ್ಲರೂ ಮನೆಯ ಡ್ರೈವರ್ ಅಂದುಕೊಂಡಿದ್ದವನೇ, ತಾತನ ನಿಜವಾದ ಮಗ!", "shock"),
+        ],
+    },
+    "ml": {
+        "name": "Malayalam", "mix_name": "Malayalam with English", "script": "Malayalam",
+        "script_re": "ഀ-ൿ", "native_digits": "൦-൯",
+        "enders": ".?!", "end_char": ".",
+        "register": ("Everyday spoken Malayalam as heard in Kochi and Thiruvananthapuram today, Malayalam script, with common "
+                     "English words mixed in naturally. Avoid heavy Sanskritized words; dialogue uses spoken forms (ഉണ്ട്, "
+                     "പോവാ, പറ). Sentences end with a full stop (.). നീ/നിങ്ങൾ/ചേട്ടൻ/ചേച്ചി show the relationship."),
+        "loanwords": "പ്ലാൻ, ഡീൽ, സോറി, പ്ലീസ്, ക്രൂ, ക്യാപ്റ്റൻ, സിഗ്നൽ, ടെൻഷൻ, പ്രൊപ്പോസ്, മിഷൻ",
+        "swaps": {"ക്രോധം": "ദേഷ്യം", "വിവാഹം കഴിച്ചു": "കല്യാണം കഴിച്ചു", "അശ്രു": "കണ്ണീർ", "തൽക്ഷണം": "ഉടനെ",
+                  "അത്യന്തം": "വല്ലാതെ", "ഗൃഹം": "വീട്"},
+        "gender_rule": ("Malayalam verbs do not change with gender, so make gender clear through nouns and pronouns "
+                        "(അവൾ, അവൻ, പെൺകുട്ടി) and keep references unambiguous."),
+        "case_style": "attached", "case_example": "{C1}എ, {C1}ഉടെ, {C1}ക്ക്, {C1}ഓട്, {E2}ഇൽ",
+        "samples": [
+            ("{C1}ഉടെ കഴുത്തിൽ ഒരു വിചിത്രമായ സ്വർണ്ണ നാണയം തൂങ്ങിക്കിടന്നു, ആരും അത് ശ്രദ്ധിച്ചില്ല.", "whisper"),
+            ("{C2}ഉടെ ശബ്ദം തണുത്തിരുന്നു, ‘നിന്റെ പ്ലാൻ ഇനി നടക്കില്ല.’", "pause"),
+            ("എല്ലാവരും വീട്ടിലെ ഡ്രൈവർ എന്ന് കരുതിയവൻ തന്നെയായിരുന്നു മുത്തച്ഛന്റെ ശരിക്കുള്ള മകൻ!", "shock"),
+        ],
+    },
+}
+
+ZWNJ = "‌"
+
+# ---------- Tamil ----------
+_TA_VIRAMA = "்"
+_TA_SIGN = {"அ": "", "ஆ": "ா", "இ": "ி", "ஈ": "ீ", "உ": "ு", "ஊ": "ூ", "எ": "ெ", "ஏ": "ே", "ஐ": "ை",
+            "ஒ": "ொ", "ஓ": "ோ", "ஔ": "ௌ"}
+_TA_HARD = set("கசடதபற")
+_TA_Y_GLIDE = set("ிீெேை")          # front vowels glide with ய; others with வ
+
+
+def _ta(name: str, rest: str):
+    if not rest or rest[0] not in _TA_SIGN:
+        return name, rest
+    v, tail = rest[0], rest[1:]
+    last = name[-1]
+    if last == _TA_VIRAMA and len(name) >= 2:
+        cons = name[-2]
+        if cons == "ம" and rest.startswith("இல்"):                 # கும்பகோணம் + இல் → கும்பகோணத்தில்
+            return name[:-2] + "த்த" + _TA_SIGN[v], tail
+        if cons in _TA_HARD:                                        # கார்த்திக் + உக்கு → கார்த்திக்குக்கு
+            return name + cons + _TA_SIGN[v], tail
+        return name[:-1] + _TA_SIGN[v], tail                        # அர்ஜுன் + இன் → அர்ஜுனின்
+    if last in _TA_Y_GLIDE and rest.startswith("உக்கு"):            # லக்ஷ்மி + உக்கு → லக்ஷ்மிக்கு
+        return name, tail
+    glide = "ய" if last in _TA_Y_GLIDE else "வ"                     # மீரா + இன் → மீராவின்
+    return name + glide + _TA_SIGN[v], tail
+
+
+# ---------- Malayalam ----------
+_ML_CHILLU = {"ൻ": "ന", "ൺ": "ണ", "ർ": "ര", "ൽ": "ല", "ൾ": "ള", "ൿ": "ക", "ൺ": "ണ", "ൻ": "ന",
+              "ർ": "ര", "ൽ": "ല", "ൾ": "ള"}
+_ML_VIRAMA = "്"
+_ML_Y_GLIDE = set("ിീെേൈ")
+_ML_V_GLIDE = set("ുൂോൊൌ")
+
+
+def _ml(name: str, rest: str):
+    suf = next((s for s in ("ഉടെ", "ഓട്", "ക്ക്", "ഇൽ", "എ") if rest.startswith(s)), None)
+    if not suf:
+        return name, rest
+    tail = rest[len(suf):]
+    last = name[-1]
+    if last in _ML_CHILLU or last == "ം" or last == _ML_VIRAMA:
+        is_n = last in ("ൻ", "ൻ")
+        base = (name[:-1] + _ML_CHILLU[last]) if last in _ML_CHILLU else (name[:-1] + "ത്ത") if last == "ം" else name[:-1]
+        out = {"എ": "െ" if is_n else "ിനെ", "ഉടെ": "്റെ" if is_n else "ിന്റെ", "ക്ക്": "്" if is_n else "ിന്",
+               "ഓട്": "ോട്" if is_n else "ിനോട്", "ഇൽ": "ിൽ"}[suf]
+        return base + out, tail                                     # അർജുൻ → അർജുന്റെ, കേരളം → കേരളത്തിൽ
+    if suf == "ക്ക്":
+        if last in _ML_Y_GLIDE:
+            return name + "ക്ക്", tail                              # ലക്ഷ്മിക്ക്
+        if last in _ML_V_GLIDE:
+            return name + "വിന്", tail                              # ഗുരുവിന്
+        return name + "യ്ക്ക്", tail                                # മീരയ്ക്ക്
+    glide = "വ" if last in _ML_V_GLIDE else "യ"
+    sign = {"എ": "െ", "ഉടെ": "ുടെ", "ഓട്": "ോട്", "ഇൽ": "ിൽ"}[suf]
+    return name + glide + sign, tail                                # മീരയുടെ, കൊച്ചിയിൽ
+
+
+# ---------- Kannada ----------
+_KN_VIRAMA = "್"
+
+
+def _kn(name: str, rest: str):
+    last = name[-1]
+    if rest.startswith("ಅಲ್ಲಿ"):
+        tail = rest[len("ಅಲ್ಲಿ"):]
+        if last == "ು":
+            return name[:-1] + "ಲ್ಲಿ", tail                         # ಬೆಂಗಳೂರು → ಬೆಂಗಳೂರಲ್ಲಿ
+        if last in "ಿೀೆೇೈ":
+            return name + "ಯಲ್ಲಿ", tail                             # ಹಳ್ಳಿಯಲ್ಲಿ
+        if last == _KN_VIRAMA:
+            return name + ZWNJ + "ನಲ್ಲಿ", tail                      # ಮಾಲ್‌ನಲ್ಲಿ
+        return name + "ದಲ್ಲಿ", tail                                 # ಗೋವಾದಲ್ಲಿ, ಮಂಡಪದಲ್ಲಿ
+    if rest.startswith("ಗೆ") and last == "ು":
+        return name[:-1] + "ಿ", rest                                # ಬೆಂಗಳೂರಿಗೆ
+    if last == _KN_VIRAMA and rest and "ಕ" <= rest[0] <= "ಹ":
+        return name + ZWNJ, rest                                    # ಅರ್ಜುನ್‌ಗೆ
+    return name, rest
+
+
+# ---------- Telugu / Odia: suffixes start with a consonant ----------
+def _virama_zwnj(virama: str, lo: str, hi: str):
+    def f(name: str, rest: str):
+        if name.endswith(virama) and rest and lo <= rest[0] <= hi:
+            return name + ZWNJ, rest                                # హైదరాబాద్‌లో
+        return name, rest
+    return f
+
+
+_JOINERS = {"ta": _ta, "ml": _ml, "kn": _kn,
+            "te": _virama_zwnj("్", "క", "హ"),
+            "or": _virama_zwnj("୍", "କ", "ହ")}
+_orig_join = qp._join
+
+
+def _join(name: str, rest: str, lang: str):
+    f = _JOINERS.get(lang)
+    if f and name and not name.startswith("{"):
+        return f(name, rest)
+    return _orig_join(name, rest, lang)
+
+
+def install() -> None:
+    for k, v in PROFILES.items():
+        qp.LANGUAGE_PROFILES.setdefault(k, v)
+    qp._join = _join
+
+
+install()

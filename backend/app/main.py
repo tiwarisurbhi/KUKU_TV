@@ -222,4 +222,64 @@ def voice_choose(pid: str, req: VoiceChooseReq):
 
 @app.get("/api/voices/{voice_id}/preview")
 async def voice_preview(voice_id: str):
-    """Preview clip, fetched once from Cartesia (or synthesized in mock mode)
+    """Preview clip, fetched once from Cartesia (or synthesized in mock mode) and cached on disk."""
+    import re as _re
+    if not _re.fullmatch(r"[A-Za-z0-9_-]{1,80}", voice_id):
+        raise HTTPException(400, "bad voice id")
+    cache = config.DATA_DIR / "previews"
+    cache.mkdir(exist_ok=True)
+    hit = next(iter(cache.glob(voice_id + ".*")), None)
+    if hit:
+        return FileResponse(hit)
+    if config.MOCK_TTS or not config.CARTESIA_API_KEY:
+        import wave as _wave
+        pcm = tts._fake_speech("नमस्ते, मैं आज की कहानी सुनाऊँगी।" * 2, 1.0, 1.0)
+        f = cache / f"{voice_id}.wav"
+        with _wave.open(str(f), "wb") as w:
+            w.setnchannels(1); w.setsampwidth(2); w.setframerate(tts.SR); w.writeframes(pcm)
+        return FileResponse(f)
+    url = await voices.preview_url(voice_id)
+    if not url:                                   # no catalog clip: have Cartesia speak a sample line with this voice
+        lang = voices.lang_of(voice_id) or "hi"
+        async with __import__("httpx").AsyncClient(timeout=60) as c:
+            pcm = await tts._synth(c, voices.SAMPLE_LINE.get(lang, voices.SAMPLE_LINE["hi"]), voice_id, lang, 1.0, 1.0, None)
+        import wave as _wave
+        f = cache / f"{voice_id}.wav"
+        with _wave.open(str(f), "wb") as w:
+            w.setnchannels(1); w.setsampwidth(2); w.setframerate(tts.SR); w.writeframes(pcm)
+        return FileResponse(f)
+    import httpx as _httpx
+    async with _httpx.AsyncClient(timeout=30, follow_redirects=True) as c:
+        r = await c.get(url, headers=voices._headers() if "cartesia" in url else {})
+    if r.status_code != 200:
+        raise HTTPException(502, f"Preview fetch failed ({r.status_code})")
+    ext = {"audio/mpeg": "mp3", "audio/wav": "wav", "audio/x-wav": "wav", "audio/ogg": "ogg"}.get(
+        r.headers.get("content-type", "").split(";")[0], "mp3")
+    f = cache / f"{voice_id}.{ext}"
+    f.write_bytes(r.content)
+    return FileResponse(f)
+
+
+@app.post("/api/projects/{pid}/narrate")
+async def narrate(pid: str, req: NarrateReq):
+    p = _ready(pid)
+    pace = min(1.2, max(0.8, req.pace))
+    audio = await tts.narrate(p, req.persona, pace, req.emotion_tags)
+    p.update(audio=audio, persona=req.persona, pace=pace)
+    db.save(p)
+    return audio
+
+
+# ---------- static ----------
+app.mount("/audio", StaticFiles(directory=config.AUDIO_DIR), name="audio")
+app.mount("/vendor", StaticFiles(directory=config.FRONTEND_DIR / "vendor"), name="vendor")
+
+
+@app.get("/support.js")
+def support_js():
+    return FileResponse(config.FRONTEND_DIR / "support.js", media_type="application/javascript")
+
+
+@app.get("/")
+def index():
+    return FileResponse(config.FRONTEND_DIR / "index.html", headers={"Cache-Control": "no-store"})

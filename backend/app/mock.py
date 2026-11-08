@@ -86,4 +86,71 @@ def respond(step: str, user: str, lang: str = "hi") -> dict:
                 "characters": [{"id": e[0], "source_name": e[1], "name_native": e[4], "name_short": e[5], "name_latin": e[6],
                                 "gender": e[7], "adapted_role": e[2], "speech_style": "", "why": ""} for e in ENT if e[3]],
                 "entities": [{"id": e[0], "source_name": e[1], "name_native": e[4], "name_short": e[5], "name_latin": e[6],
-                              "type": e[2], "why
+                              "type": e[2], "why": ""} for e in ENT if not e[3]],
+                "glossary": [{"source_term": a, "target_term": b} for a, b in
+                             [("veil", "घूँघट"), ("deeds", "काग़ज़"), ("estate", "महल"), ("strongbox", "तिजोरी"),
+                              ("wedding", "शादी"), ("letter", "चिट्ठी"), ("uncle", "चाचा"), ("seam", "सिलाई"),
+                              ("fair", "मेला"), ("bride", "दुल्हन")]],
+                "plot_adjustments": [], "keep_unchanged": ["The letter in the seam"], "notes": n}
+    if step == "story":
+        return {"title": "माँ का {E2}", "beats": [{"id": b, "lines": ls} for b, ls in STORY], "notes": n}
+    if step == "twist_rewrite":
+        return {"beats": [], "notes": n}
+    if step == "story_edit":
+        story = json.loads(_tag(user, "current_story"))
+        anchor = _tag(user, "anchor")
+        names = {e[0]: e[4] for e in ENT}
+        target = None
+        if anchor and anchor != "None":
+            for b in story["beats"]:
+                txt = " ".join(re.sub(r"\{(\w+)\}", lambda m: names.get(m.group(1), ""), l["text"]) for l in b["lines"])
+                if anchor[:6] in txt:
+                    target = b["id"]
+        target = target or "B4"
+        for b in story["beats"]:
+            if b["id"] == target:
+                plain = [l for l in b["lines"] if l["twist_role"] == "none"]
+                if plain and len(b["lines"]) > 1:
+                    b["lines"].remove(plain[0])                            # "tighten": drop a non-twist line
+                else:
+                    b["lines"][0]["text"] = b["lines"][0]["text"].rstrip("।!?") + ", बस।"
+        return {"title": story.get("title", ""), "beats": story["beats"], "notes": n}
+    if step == "chat_router":
+        msg = _tag(user, "message")
+        low = msg.lower()
+        quote = re.search(r'selected text: "([^"]+)"\) ?(.*)', msg)
+        body = (quote.group(2) if quote else msg).strip()
+        cast = _cast(user)
+        none = {"target_id": "", "new_name_native": "", "new_name_latin": "", "persona": "", "pace": "", "instruction": ""}
+        target = None
+        if quote:
+            q = quote.group(1).strip(" ।.!?’‘")
+            target = next((k for k, v in cast.items() if q in v), None)
+        m = re.search(r"rename\s+@?(\S+)\s+(?:to\s+)?@?(\S+)", body, re.I)
+        if m:
+            target = next((k for k, v in cast.items() if m.group(1).strip(".,") in v), target)
+            new = m.group(2).strip(".,!")
+        else:
+            new = body.strip(".,!") if re.fullmatch(r"[A-Za-z]+", body.strip(".,!")) else ""
+        if target and new:
+            return {"actions": [{**none, "type": "rename", "target_id": target, "new_name_native": TR.get(new.lower(), new),
+                                 "new_name_latin": new.title()}], "reply": f"Renaming to {new.title()}.", "notes": n}
+        if re.search(r"voice|narrat|persona|radio|trailer|grandma|ott|slower|faster", low):
+            persona = "radio" if "radio" in low else "trailer" if "trailer" in low else "grandma" if "grandma" in low else "ott" if "ott" in low else ""
+            acts = []
+            if persona:
+                acts.append({**none, "type": "persona", "persona": persona})
+            if re.search(r"slow|faster|quick", low):
+                acts.append({**none, "type": "pace", "pace": "faster" if re.search(r"fast|quick", low) else "slower"})
+            return {"actions": acts or [{**none, "type": "persona", "persona": "radio"}], "reply": "Changing the narrator.", "notes": n}
+        if body.endswith("?"):
+            return {"actions": [{**none, "type": "question"}], "reply": "(mock) It ends with her as the owner of the palace.", "notes": n}
+        return {"actions": [{**none, "type": "story_edit", "instruction": body}], "reply": "Tightening that passage.", "notes": n}
+    if step == "voice_pick":
+        ids = re.findall(r"^(\S+) \| ", _tag(user, "voices"), re.M)[1:]      # skip the header row
+        return {"voice_id": ids[0] if ids else "", "backup_ids": ids[1:3], "reason": "(mock) warm voice suits this family drama", "notes": n}
+    if step == "transliterate":
+        typed = re.search(r">([^<]+)</name>", user).group(1).strip()
+        native = TR.get(typed.lower(), typed)
+        return {"name_native": native, "name_short": native, "name_latin": typed.title(), "notes": n}
+    raise ValueError(step)

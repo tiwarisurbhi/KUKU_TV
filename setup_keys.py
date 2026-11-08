@@ -185,4 +185,24 @@ def main():
                     alt = pick_voice(voices, "masculine" if env_key == "VOICE_TRAILER" else "feminine", taken)
                     if alt:
                         vals[env_key] = alt["id"]
-                        print(f"{Y}  ↺ {env_key:<14} preset not on your account; using {alt['name']}
+                        print(f"{Y}  ↺ {env_key:<14} preset not on your account; using {alt['name']} ({alt['id']}){X}")
+                    else:
+                        print(f"{R}  ✗ {env_key}: no Hindi voice found{X}")
+                taken.add(vals.get(env_key, ""))
+            vals["VOICE_DEFAULT"] = vals.get("VOICE_GRANDMA", PRESET["VOICE_GRANDMA"][0])
+        except Exception as e:
+            print(f"{R}  ✗ Couldn't verify: {e}. Saved anyway with the default Hindi voices.{X}")
+    else:
+        print(f"{Y}  Skipped — narration won't run until this is set.{X}")
+
+    vals.setdefault("MOCK_LLM", "0")
+    vals.setdefault("MOCK_TTS", "0")
+    write_env(vals)
+    print(f"\n{G}{B}Saved.{X} Start the app with  ./run.sh  (restart it if it's already running).\n")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nCancelled — nothing changed.")

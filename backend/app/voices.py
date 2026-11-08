@@ -137,4 +137,50 @@ async def pick(p: dict, persona: str) -> dict:
         else:
             log.warning("voice_pick returned an id not in the finalists (%s); using top-ranked", r.voice_id)
     except Exception as e:                                   # casting must never block a story
-        log.warning("voice_p
+        log.warning("voice_pick failed, using top-ranked voice: %s", e)
+    v = by_id[chosen]
+    return {**base, "voice_id": chosen, "name": v["name"], "gender": v["gender"], "accent": v["accent"],
+            "native": v["native"], "tagline": v["tagline"], "reason": reason, "by": by, "backup_ids": backups,
+            "pool": len(ranked), "native_count": sum(x["native"] for x in voices),
+            "finalists": [{k: x[k] for k in ("id", "name", "gender", "accent", "native", "tagline")} for x in finalists]}
+
+
+def choose(p: dict, voice_id: str) -> dict:
+    """The writer picked a voice from the finalists."""
+    cur = p.get("voice") or {}
+    f = next((x for x in cur.get("finalists", []) if x["id"] == voice_id), None)
+    if not f:
+        raise ValueError("That voice is not in this story's list")
+    return {**cur, "voice_id": voice_id, "name": f["name"], "gender": f["gender"], "accent": f["accent"],
+            "native": f["native"], "tagline": f["tagline"], "reason": "Chosen by the writer.", "by": "writer"}
+
+
+SAMPLE_LINE = {   # spoken when a voice has no catalog preview clip
+    "hi": "नमस्ते, आज मैं आपको एक ऐसी कहानी सुनाऊँगी, जिसका अंत आप सोच भी नहीं सकते।",
+    "bn": "নমস্কার, আজ তোমাদের এমন একটা গল্প শোনাব, যার শেষটা তোমরা ভাবতেও পারবে না।",
+    "pa": "ਸਤ ਸ੍ਰੀ ਅਕਾਲ, ਅੱਜ ਮੈਂ ਤੁਹਾਨੂੰ ਇੱਕ ਅਜਿਹੀ ਕਹਾਣੀ ਸੁਣਾਵਾਂਗੀ, ਜਿਸਦਾ ਅੰਤ ਤੁਸੀਂ ਸੋਚ ਵੀ ਨਹੀਂ ਸਕਦੇ।",
+    "mr": "नमस्कार, आज मी तुम्हाला अशी एक गोष्ट सांगणार आहे, जिचा शेवट तुम्ही विचारही करू शकणार नाही.",
+    "gu": "નમસ્તે, આજે હું તમને એવી એક વાર્તા કહીશ, જેનો અંત તમે વિચારી પણ નહીં શકો.",
+    "or": "ନମସ୍କାର, ଆଜି ମୁଁ ଆପଣଙ୍କୁ ଏମିତି ଏକ ଗଳ୍ପ ଶୁଣାଇବି, ଯାହାର ଶେଷ ଆପଣ ଭାବି ବି ପାରିବେନି।",
+    "ta": "வணக்கம், இன்னைக்கு நான் உங்களுக்கு ஒரு கதை சொல்லப் போறேன், அதோட முடிவை நீங்க நினைச்சுக்கூட பார்க்க முடியாது.",
+    "te": "నమస్కారం, ఈ రోజు నేను మీకు ఒక కథ చెప్పబోతున్నాను, దాని ముగింపు మీరు ఊహించను కూడా ఊహించలేరు.",
+    "kn": "ನಮಸ್ಕಾರ, ಇವತ್ತು ನಾನು ನಿಮಗೆ ಒಂದು ಕಥೆ ಹೇಳ್ತೀನಿ, ಅದರ ಕೊನೆಯನ್ನು ನೀವು ಊಹಿಸೋಕೂ ಸಾಧ್ಯವಿಲ್ಲ.",
+    "ml": "നമസ്കാരം, ഇന്ന് ഞാൻ നിങ്ങളോട് ഒരു കഥ പറയാം, അതിന്റെ അവസാനം നിങ്ങൾക്ക് ഊഹിക്കാൻ പോലും പറ്റില്ല.",
+}
+
+
+def lang_of(voice_id: str) -> str:
+    for code in config.LANGS:
+        cached, _ = db.get_voices(config.LANGS[code][1])
+        if any(v["id"] == voice_id for v in cached or []):
+            return config.LANGS[code][1]
+    return ""
+
+
+async def preview_url(voice_id: str) -> str:
+    for lang in config.LANGS:
+        cached, _ = db.get_voices(config.LANGS[lang][1])
+        for v in cached or []:
+            if v["id"] == voice_id:
+                return v.get("preview_url") or ""
+    return ""

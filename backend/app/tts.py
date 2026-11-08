@@ -176,4 +176,65 @@ async def voice_for(persona: str, lang: str) -> str:
             if voices:
                 best = max(voices, key=score)
                 _lang_voices[key] = best["id"]
-                logging.getLogger("tts").info("voice for %s/%s: %s (%s)", lang, persona, best.get
+                logging.getLogger("tts").info("voice for %s/%s: %s (%s)", lang, persona, best.get("name"), best["id"])
+        except (httpx.HTTPError, keys.NoLiveKey):
+            pass
+    return _lang_voices[key]
+
+
+async def narrate(p: dict, persona: str, pace: float, emotion_tags: str = "") -> dict:
+    lang = config.LANGS[p["lang"]][1]
+    cast = p.get("voice") or {}
+    # precedence: explicit .env override for this persona+language > this story's cast voice > .env / catalog fallback
+    voice = config.voice_override(persona, lang) or (cast.get("voice_id") if cast.get("persona") == persona else "") \
+        or await voice_for(persona, lang)
+    if not config.MOCK_TTS:
+        if not keys.TTS:
+            raise TTSError("No Cartesia key is set (CARTESIA_API_KEY_1 … _5 in backend/.env)")
+        if not voice:
+            raise TTSError(f"No Cartesia voice id for persona '{persona}' (set VOICE_{persona.upper()} or VOICE_DEFAULT)")
+    base = PERSONAS.get(persona, PERSONAS["ott"])
+    mode = emotion_mode(emotion_tags)
+    tags_on = mode == "all" or (mode == "english" and lang == "en")
+    lines = display.lines(p)                      # swap_names() text: exactly what the editor sees
+
+    plan, prev_beat, prev_post, rise = [], None, 0, 0
+    for s in lines:
+        cue = CUES.get(s["cue"])
+        rise = rise + 1 if s["cue"] == "rising" else 0
+        first_of_beat = s["beat"] != prev_beat
+        gap = 0 if prev_beat is None else (GAP_BEAT_MS if first_of_beat else GAP_SENT_MS)
+        gap = max(gap, prev_post) + (cue["pre"] if cue else 0)
+        k = min(rise, 3) - 1 if rise else 0
+        sp = (cue["speed"] + RISE_STEP["speed"] * k) if cue else 1
+        vo = (cue["volume"] + RISE_STEP["volume"] * k) if cue else 1
+        speed = _clamp(base["speed"] * pace * sp, 0.6, 1.5)
+        vol = _clamp(base["volume"] * vo, 0.5, 2.0)
+        emo = ((cue or {}).get("emotion") or base["emotion"]) if tags_on else None
+        plan.append((s, gap, s["text"], speed, vol, emo))
+        prev_beat, prev_post = s["beat"], (cue["post"] if cue else 0)
+
+    async with httpx.AsyncClient(timeout=90) as client:
+        async def one(item):
+            async with _sem:
+                return await _synth(client, item[2], voice, lang, item[3], item[4], item[5])
+        pcms = await asyncio.gather(*[one(x) for x in plan])
+
+    out, timings, cursor = bytearray(), [], 0
+    for (s, gap, *_), pcm in zip(plan, pcms):
+        out += _silence(gap)
+        start = len(out) / 2 / SR
+        out += pcm
+        timings.append({"sid": s["sid"], "beat": s["beat"], "start": round(start, 3), "end": round(len(out) / 2 / SR, 3)})
+    out += _silence(500)
+    duration = len(out) / 2 / SR
+
+    name = f"{p['id']}-{int(time.time())}.wav"
+    with wave.open(str(config.AUDIO_DIR / name), "wb") as w:
+        w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR); w.writeframes(bytes(out))
+
+    env = _levels(bytes(out), max(1, int(duration * 20)))      # 20 Hz loudness envelope for the orb
+    bars = _levels(bytes(out), 64)
+    return {"url": f"/audio/{name}", "duration": round(duration, 3), "sents": timings,
+            "bars": [round(18 + 82 * b) for b in bars], "env": env, "persona": persona, "pace": pace,
+            "lang": lang, "voice": voice, "emotion_tags": mode}

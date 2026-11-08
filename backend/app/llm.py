@@ -184,4 +184,5 @@ async def call_request(step: str, req: dict, lang: str = "hi", *, on_text=None):
                 repair = dict(req, **{k: v for k, v in qp.SAMPLING["json_repair"].items() if k != "top_k"})
                 repair["extra_body"] = dict(req.get("extra_body") or {}, top_k=qp.SAMPLING["json_repair"]["top_k"])
                 messages = qp.build_repair_messages(req["messages"], content[:14000], str(e)[:1200])
-           
+                content = await _post(repair, messages)
+        raise LLMError(f"{step}: model did not return valid structured output ({err})")

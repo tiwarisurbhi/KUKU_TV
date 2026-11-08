@@ -101,4 +101,47 @@ rep('''          </section>
               <button class="btn btn-g btn-sm" onClick="{{retryCraft}}">Retry</button>
             </div>
           </sc-if>
-          <s
+          <sc-if value="{{hasLive}}" hint-placeholder-val="{{ false }}">
+            <section class="live" aria-label="What the model is writing">
+              <div class="live-h"><span class="ldot" aria-hidden="true"></span><span class="shim">{{liveTitle}}</span><span class="mono live-m">{{liveMeta}}</span></div>
+              <div class="live-body" ref="{{liveRef}}">
+                <sc-for list="{{liveLines}}" as="ll" hint-placeholder-count="4"><div class="ll {{ll.cls}}" lang="{{ll.lang}}">{{ll.text}}<sc-if value="{{ll.open}}" hint-placeholder-val="{{ false }}"><span class="caret" aria-hidden="true"></span></sc-if></div></sc-for>
+              </div>
+            </section>
+          </sc-if>
+          <sc-if value="{{showSkel}}" hint-placeholder-val="{{ true }}">
+          <div class="skel-page" aria-hidden="true">
+            <sc-for list="{{skelLines}}" as="k" hint-placeholder-count="10"><span class="skel" style="height: 14px; width: {{k.w}}%"></span></sc-for>
+          </div>
+          </sc-if>''')
+rep('.task .st.ok{color:var(--ok)}', '.task .st.ok{color:var(--ok)}.task .st.err{color:var(--err)}')
+rep('/* ===== Motion ===== */', CSS_EXTRA + '\n/* ===== Motion ===== */')
+rep('family=Noto+Sans+Oriya:wght@400;500;600', 'family=Noto+Sans+Oriya:wght@400;500;600&amp;family=Noto+Sans+Gurmukhi:wght@400;500;600&amp;family=Noto+Sans+Gujarati:wght@400;500;600&amp;family=Noto+Sans+Tamil:wght@400;500;600&amp;family=Noto+Sans+Telugu:wght@400;500;600&amp;family=Noto+Sans+Kannada:wght@400;500;600&amp;family=Noto+Sans+Malayalam:wght@400;500;600')
+rep('<p class="note">Press Enter to apply. The change runs through the whole story and the narration.</p>',
+    '<p class="note">Press Enter to apply. The change runs through the whole story and the narration.</p>\n'
+    '          <sc-if value="{{hasGlossary}}" hint-placeholder-val="{{ false }}"><div class="sec-h"><span>Glossary</span><span>Words the narrator uses</span></div>'
+    '<div class="gl"><sc-for list="{{glossary}}" as="g" hint-placeholder-count="4"><div class="gl-row"><span class="muted">{{g.src}}</span>'
+    '<span class="{{bodyCls}} gl-dst" lang="{{htmlLang}}">{{g.dst}}</span></div></sc-for></div></sc-if>')
+rep('<div class="rs-lbls"><span>Unhurried</span><span>Natural</span><span>Brisk</span></div>',
+    '<div class="rs-lbls"><span>Unhurried</span><span>Natural</span><span>Brisk</span></div>\n'
+    '          <div class="sec-h"><span>Narrator voice</span><span>{{voiceBy}}</span></div>\n'
+    '          <sc-if value="{{voicePicking}}" hint-placeholder-val="{{ false }}"><div class="vcard"><span class="busy-line"><span class="shim">Casting the narrator for this story…</span></span></div></sc-if>\n'
+    '          <sc-if value="{{hasVoice}}" hint-placeholder-val="{{ false }}">'
+    '<div class="vcard"><button class="vplay {{voicePlayCls}}" onClick="{{previewVoice}}" aria-label="Play voice preview">'
+    '<sc-if value="{{voicePlaying}}" hint-placeholder-val="{{ false }}"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"></rect><rect x="14" y="5" width="4" height="14" rx="1"></rect></svg></sc-if>'
+    '<sc-if value="{{voiceNotPlaying}}" hint-placeholder-val="{{ true }}"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 001.5.86l10.5-6.5a1 1 0 000-1.72L9.5 4.64A1 1 0 008 5.5z"></path></svg></sc-if></button>'
+    '<div class="vmeta"><b>{{voiceName}}</b><small>{{voiceMeta}}</small><p>{{voiceReason}}</p></div></div>'
+    '<div class="row" style="gap: 8px; margin-top: 8px"><button class="btn btn-g btn-sm" onClick="{{toggleVoiceList}}" aria-expanded="{{voiceListOpen}}">{{voiceListLabel}}</button>'
+    '<button class="btn btn-g btn-sm" onClick="{{recastVoice}}">Pick again</button></div>'
+    '<sc-if value="{{voiceListOpen}}" hint-placeholder-val="{{ false }}"><div class="vlist" role="listbox" aria-label="Voices">'
+    '<sc-for list="{{voiceOptions}}" as="vo" hint-placeholder-count="6"><div class="vrow {{vo.cls}}">'
+    '<button class="vplay sm" onClick="{{vo.preview}}" aria-label="{{vo.aria}}"><svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 001.5.86l10.5-6.5a1 1 0 000-1.72L9.5 4.64A1 1 0 008 5.5z"></path></svg></button>'
+    '<button class="vpick" role="option" aria-selected="{{vo.on}}" onClick="{{vo.pick}}"><b>{{vo.name}}</b><small>{{vo.meta}}</small></button>'
+    '<sc-if value="{{vo.on}}" hint-placeholder-val="{{ false }}"><span class="pk">✓</span></sc-if></div></sc-for>'
+    '<p class="note">{{voicePoolNote}}</p></div></sc-if></sc-if>')
+rep('<title>Screening Room</title>', '<title>Screening Room</title>\n<meta name="viewport" content="width=device-width, initial-scale=1">')
+
+logic = (HERE / "logic.js").read_text(encoding="utf-8")
+out = tpl + "<script type=\"text/x-dc\" data-dc-script data-props='{}'>\n" + logic + "</script>\n</body>\n</html>\n"
+(HERE / "index.html").write_text(out, encoding="utf-8")
+print("built index.html", len(out), "bytes")
