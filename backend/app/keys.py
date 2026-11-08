@@ -71,11 +71,13 @@ class KeyPool:
         live = self.live()
         if not live:
             n = len(self.keys)
+            var = "SILICONFLOW_API_KEY_1 … _5" if self.service == "llm" else "CARTESIA_API_KEY_1 … _5"
             if not n:
-                raise NoLiveKey(f"No {self.label} key is set in backend/.env")
-            raise NoLiveKey(f"All {n} {self.label} key{'s' if n != 1 else ''} are retired (out of credit or "
-                            f"invalid). Add a fresh key to backend/.env, or run  python -m app.keys reset "
-                            f"{self.service}  if you topped one up.")
+                raise NoLiveKey(f"No {self.label} key is set. Add {var} (backend/.env locally, Environment tab on Render).")
+            last = max(self._retired.values(), key=lambda r: r[1])[0] if self._retired else ""
+            head = (f"The only {self.label} key is retired" if n == 1 else f"All {n} {self.label} keys are retired")
+            raise NoLiveKey(f"{head} (last error: {last[:140]}). Only {n} key{'s' if n != 1 else ''} configured — "
+                            f"add more as {var}.")
         return live[0]
 
     def slot(self, key: str) -> int:
@@ -93,7 +95,7 @@ class KeyPool:
         if status == 429 and _RATE_WORDS.search(body) and not re.search(r"insufficient|balance|credit|quota", body, re.I):
             return False
         if status == 403:
-            return not re.search(r"\bvoice\b", body, re.I)        # a private voice is not a dead key
+            return bool(_DEAD_WORDS.search(body)) and not re.search(r"\bvoice\b", body, re.I)
         return status in (400, 429) and bool(_DEAD_WORDS.search(body))
 
     def retire(self, key: str, reason: str) -> None:
