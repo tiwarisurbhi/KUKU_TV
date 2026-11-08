@@ -61,4 +61,3 @@ backend/app/
 | POST | `/api/projects/{id}/narrate` | `{persona, pace, emotions}` → audio URL + timings |
 
 Data (SQLite plus WAVs) is stored in `backend/data/`. Projects resume from the URL (`#p=<id>`).
-
